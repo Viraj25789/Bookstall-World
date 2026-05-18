@@ -11,7 +11,7 @@ from collections import defaultdict
 app = Flask(__name__)
 
 # ── Security ──────────────────────────────────────────────────────────────────
-app.secret_key = os.environ.get('SECRET_KEY', 'change-me-before-going-live')
+app.secret_key = os.environ.get('SECRET_KEY', 'bookstall25789')
 
 # ── Database (Vercel Postgres — free, inside Vercel dashboard) ────────────────
 # Vercel Postgres exposes two URLs:
