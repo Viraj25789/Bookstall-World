@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark mb-0">🎯 Order Tracker</h2>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-7">
+        <form action="/admin/orders" method="GET" class="d-flex search-pill bg-white">
+            <input type="text" name="q" class="form-control border-0 bg-transparent shadow-none fw-medium ms-2" placeholder="Search Order ID or Username..." value="{{ search_query }}">
+            <button type="submit" class="btn btn-magic rounded-pill px-4 ms-2">Track 🕵️</button>
+            <a href="/admin/orders" class="btn btn-light rounded-pill ms-1 text-muted"><i class="bi bi-x-lg"></i></a>
+        </form>
+    </div>
+</div>
+
+{% if search_query and matched_users %}
+<div class="mb-4">
+    {% for uid, uname in matched_users.items() %}
+    <a href="/admin/customer/{{ uid }}" class="btn btn-sm btn-outline-primary rounded-pill me-2 mb-2 fw-bold shadow-sm">
+        <i class="bi bi-person-circle me-1"></i> View {{ uname }}'s Profile
+    </a>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="card modern-card border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-borderless table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small fw-bold text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3">Order Ref</th>
+                        <th class="py-3">Shopper</th>
+                        <th class="py-3">Loot Bag</th>
+                        <th class="py-3">Revenue</th>
+                        <th class="pe-4 py-3 text-end">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr class="border-bottom border-light">
+                        <td class="ps-4 py-3">
+                            <span class="badge bg-dark rounded-pill shadow-sm fs-6">#{{ order.id }}</span>
+                        </td>
+                        <td>
+                            <a href="/admin/customer/{{ order.user_id }}" class="text-decoration-none">
+                                <span class="d-block fw-bold text-dark fs-6">{{ order.user.username }}</span>
+                            </a>
+                            <small class="text-muted fw-medium">ID: {{ order.user.id }}</small>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled mb-0 small fw-medium text-muted">
+                            {% for item in order.items %}
+                                <li><span class="text-gradient">✦</span> {{ item.quantity }}x {{ item.product.name }}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="fw-bold text-gradient fs-5">₹{{ order.total_amount }}</td>
+                        <td class="pe-4 text-end text-muted small fw-bold">{{ order.date_ordered.strftime('%b %d, %Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted fw-bold">No orders match your vibe check.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

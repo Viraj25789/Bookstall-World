@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import strip, bundle_strip, sec %}
+{% block content %}
+
+<div class="text-center py-4 mb-2">
+    <h1 class="display-4 text-gradient fw-bold mb-2">Level up your desk.</h1>
+    <p class="text-secondary fw-medium mb-4">From bestselling books to everyday stationery essentials all in one place.</p>
+    <form action="/" method="GET" class="d-flex search-pill col-lg-7 col-md-9 mx-auto">
+        <select name="category" class="form-select border-0 bg-transparent fw-bold text-muted flex-shrink-0" style="width:145px;box-shadow:none;">
+            <option value="">All Items</option>
+            <option value="Book" {% if category_filter=='Book' %}selected{% endif %}>📚 Books</option>
+            <option value="Stationery" {% if category_filter=='Stationery' %}selected{% endif %}>✏️ Stationery</option>
+        </select>
+        <div class="vr mx-2 my-2 opacity-25"></div>
+        <input type="text" name="q" class="form-control border-0 bg-transparent shadow-none fw-medium" placeholder="Search products…" value="{{ search_query }}">
+        <button type="submit" class="btn btn-magic px-4 ms-1 flex-shrink-0">Go!</button>
+    </form>
+</div>
+
+{% if not search_query and not category_filter %}
+    {% if not session.get('username') or session.get('role') == 'admin' %}
+        {% if recs.personalised %}
+            <section class="mb-5">
+                {{ sec('🔥', 'Trending Now', 'Most popular products', 'Live', '#e17055') }}
+                {{ strip(recs.personalised) }}
+            </section>
+        {% endif %}
+        {% if recs.bundles %}
+            <section class="mb-5">
+                {{ sec('🎁', 'Complete the Set', 'Frequently bought together — save time, buy the bundle', 'Often Paired', '#fd79a8') }}
+                {{ bundle_strip(recs.bundles) }}
+            </section>
+        {% endif %}
+        {% if recs.people_also %}
+            <section class="mb-5">
+                {{ sec('🛍️', 'You May Also Like', 'Based on what other people enjoy', 'Popular Picks', '#0984e3') }}
+                {{ strip(recs.people_also) }}
+            </section>
+        {% endif %}
+        {% if recs.category %}
+            <section class="mb-5">
+                {{ sec('🏷️', 'More ' ~ (recs.fav_cat ~ 's' if recs.fav_cat else "You'll Love"), 'More from your most-shopped category', None, None) }}
+                {{ strip(recs.category) }}
+            </section>
+        {% endif %}
+        {% if recs.trending %}
+            <section class="mb-5">
+                {{ sec('📈', 'Also Popular', 'More top picks from the store', 'Store-wide', '#e17055') }}
+                {{ strip(recs.trending) }}
+            </section>
+        {% endif %}
+    {% else %}
+        {% if recs.trending %}
+            <section class="mb-5">
+                {{ sec('🔥', 'Trending Now', 'Most popular products', 'Live', '#e17055') }}
+                {{ strip(recs.trending) }}
+            </section>
+        {% endif %}
+        {% if recs.bundles %}
+            <section class="mb-5">
+                {{ sec('🎁', 'Complete the Set', 'Frequently bought together — save time, buy the bundle', 'Often Paired', '#fd79a8') }}
+                {{ bundle_strip(recs.bundles) }}
+            </section>
+        {% endif %}
+    {% endif %}
+{% endif %}
+
+<div class="d-flex align-items-center gap-2 mb-3 mt-4">
+    <h5 class="fw-bold text-dark mb-0">{% if search_query or category_filter %}🔍 Results{% else %}🛍️ All Products{% endif %}</h5>
+    <span class="badge bg-light text-muted rounded-pill fw-bold">{{ products|length }} items</span>
+    {% if search_query or category_filter %}
+        <a href="/" class="btn btn-sm btn-light rounded-pill ms-auto text-muted fw-bold"><i class="bi bi-x-lg me-1"></i>Clear</a>
+    {% endif %}
+</div>
+
+<div class="row g-4 mb-5">
+    {% for p in products %}
+    <div class="col-md-4 col-lg-3">
+        <div class="card h-100 modern-card">
+            <div class="p-3" style="background:radial-gradient(circle,#fdfbfb 0%,#ebedee 100%);">
+                <img src="{{ p.image_url }}" class="img-fluid rounded-4 shadow-sm w-100" style="height:180px;object-fit:cover;" alt="{{ p.name }}" onerror="this.src='https://via.placeholder.com/300x200?text=📦'">
+            </div>
+            <div class="card-body d-flex flex-column pt-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge rounded-pill" style="background:#ffeaa7;color:#d63031;">{{ p.category }}</span>
+                    {% if p.stock_quantity < 5 and p.stock_quantity > 0 %}<span class="badge rounded-pill bg-danger"><i class="bi bi-fire"></i> Hot!</span>{% endif %}
+                </div>
+                <h5 class="card-title fw-bold text-dark mb-1">{{ p.name }}</h5>
+                <h4 class="fw-bold mb-3 text-gradient">₹{{ p.price }}</h4>
+                <div class="mt-auto">
+                    <p class="text-muted small fw-medium mb-3">📦 {{ p.stock_quantity }} left in stock</p>
+                    <form method="POST" action="/add_to_cart/{{ p.id }}">
+                        <div class="d-flex gap-2">
+                            <input type="number" name="quantity" class="form-control text-center rounded-pill bg-light border-0 fw-bold" value="1" min="1" max="{{ p.stock_quantity }}" style="width:70px;" required>
+                            {% if p.stock_quantity > 0 %}
+                                <button type="submit" class="btn btn-dark flex-grow-1 shadow-sm"><i class="bi bi-bag-plus-fill me-1"></i>Add</button>
+                            {% else %}
+                                <button disabled class="btn btn-light flex-grow-1 text-muted">Sold Out 😢</button>
+                            {% endif %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <i class="bi bi-emoji-frown display-1 text-muted opacity-25 mb-3 d-block"></i>
+        <h3 class="fw-bold text-secondary">Nothing found.</h3>
+        <p class="text-muted">Try a different search!</p>
+        <a href="/" class="btn btn-magic mt-2 px-4">Browse All</a>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.rec-strip{overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px;}
+.rec-strip::-webkit-scrollbar{display:none;}
+.rec-card{width:190px;scroll-snap-align:start;transition:transform .2s;}
+.rec-card:hover{transform:translateY(-6px);}
+</style>
+{% endblock %}

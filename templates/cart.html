@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% from 'macros.html' import strip, sec %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold text-dark mb-0">🛒 Your Cart</h2>
+</div>
+
+<div class="card modern-card border-0">
+    <div class="card-body p-0">
+        {% if cart_items %}
+        <div class="table-responsive">
+            <table class="table table-borderless align-middle mb-0">
+                <thead class="bg-light text-muted small fw-bold text-uppercase" style="letter-spacing: 1px;">
+                    <tr>
+                        <th class="ps-4 py-3 rounded-top-start">Item</th>
+                        <th class="py-3">Price</th>
+                        <th class="py-3">Qty</th>
+                        <th class="py-3">Subtotal</th>
+                        <th class="pe-4 py-3 text-end rounded-top-end">Drop</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr class="border-bottom border-light">
+                        <td class="ps-4 py-3 fw-bold text-dark">{{ item.product.name }}</td>
+                        <td class="text-muted fw-medium">₹{{ item.product.price }}</td>
+                        <td>
+                            <form method="POST" action="/update_cart/{{ item.id }}" class="d-flex align-items-center" style="max-width: 120px;">
+                                <input type="number" name="quantity" class="form-control form-control-sm me-2 text-center rounded-pill bg-light border-0 fw-bold" value="{{ item.quantity }}" min="1" max="{{ item.product.stock_quantity }}">
+                                <button type="submit" class="btn btn-sm btn-light text-primary rounded-circle shadow-sm"><i class="bi bi-check-lg"></i></button>
+                            </form>
+                        </td>
+                        <td class="fw-bold text-gradient fs-5">₹{{ item.product.price * item.quantity }}</td>
+                        <td class="pe-4 text-end">
+                            <form method="POST" action="/remove_from_cart/{{ item.id }}">
+                                <button type="submit" class="btn btn-sm btn-light text-danger rounded-circle shadow-sm"><i class="bi bi-trash-fill"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if recs and (recs.personalised or recs.people_also or recs.category or recs.trending) %}
+        <div class="p-4 border-top bg-white">
+            <h4 class="fw-bold text-dark mb-4">Complete your collection with these recommended picks</h4>
+
+            {% if recs.personalised %}
+            <section class="mb-4">
+                {{ sec('✨', 'Picked For You', 'Personalised from your purchase history', 'AI · For ' ~ session.username, '#6c5ce7') }}
+                {{ strip(recs.personalised) }}
+            </section>
+            {% endif %}
+
+            {% if recs.people_also %}
+            <section class="mb-4">
+                {{ sec('🛒', 'People Also Bought', 'People who bought what you bought also got these', 'Collaborative Filter', '#00b894') }}
+                {{ strip(recs.people_also) }}
+            </section>
+            {% endif %}
+
+            {% if recs.category %}
+            <section class="mb-4">
+                {{ sec('🏷️', 'More ' ~ (recs.fav_cat ~ 's' if recs.fav_cat else 'Items'), 'More from your most-shopped category', None, None) }}
+                {{ strip(recs.category) }}
+            </section>
+            {% endif %}
+
+            {% if recs.trending %}
+            <section class="mb-2">
+                {{ sec('📈', 'Also Popular', 'More top picks from the store', 'Store-wide', '#e17055') }}
+                {{ strip(recs.trending) }}
+            </section>
+            {% endif %}
+
+            <style>
+            .rec-strip{overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:6px;}
+            .rec-strip::-webkit-scrollbar{display:none;}
+            .rec-card{width:190px;scroll-snap-align:start;transition:transform .2s;}
+            .rec-card:hover{transform:translateY(-6px);}
+            </style>
+        </div>
+        {% endif %}
+        
+        <div class="p-4 bg-light d-flex justify-content-between align-items-center border-top">
+            <span class="text-muted fw-bold text-uppercase tracking-wide">Final Amount</span>
+            <span class="display-6 fw-bold text-dark">₹{{ total }}</span>
+        </div>
+        <div class="p-4 text-end border-top">
+            <form method="POST" action="/checkout">
+                <button type="submit" class="btn btn-magic btn-lg px-5 shadow-sm fs-5">Secure Checkout 💳</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <div class="display-1 mb-3">👻</div>
+            <h3 class="fw-bold text-dark">Looks like your cart is empty.</h3>
+            <p class="text-muted fw-medium mb-4">Your next favorite Favorites are waiting.</p>
+            <a href="/" class="btn btn-magic px-5 shadow-sm">Shop Now</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

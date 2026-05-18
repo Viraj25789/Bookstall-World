@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="fw-bold text-dark mb-4">📦 Your Orders</h2>
+
+<div class="card modern-card border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-borderless align-middle mb-0">
+                <thead class="bg-light text-muted small fw-bold text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3">Order ID</th>
+                        <th class="py-3">What You Got</th> 
+                        <th class="py-3">Total Paid</th>
+                        <th class="pe-4 py-3">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr class="border-bottom border-light">
+                        <td class="ps-4 py-3">
+                            <span class="badge bg-dark rounded-pill fs-6 shadow-sm">#{{ order.id }}</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled mb-0 small fw-medium text-muted">
+                            {% for item in order.items %}
+                                <li><span class="text-gradient">✔</span> {{ item.quantity }}x {{ item.product.name }}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="fw-bold text-dark fs-5">₹{{ order.total_amount }}</td>
+                        <td class="pe-4 text-muted small fw-bold"><i class="bi bi-calendar-event me-1"></i> {{ order.date_ordered.strftime('%b %d, %Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center py-5">
+                            <div class="display-1 mb-3">🍃</div>
+                            <h4 class="fw-bold text-dark">No orders yet.</h4>
+                            <p class="text-muted fw-medium">Time to treat yourself!</p>
+                            <a href="/" class="btn btn-light shadow-sm fw-bold text-primary mt-2">Start Shopping</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

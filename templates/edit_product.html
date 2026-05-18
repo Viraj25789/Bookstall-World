@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 mt-4">
+        <div class="card modern-card border-0" style="border-radius: 30px;">
+            <div class="card-header bg-transparent border-0 pt-5 pb-0 text-center">
+                <div class="d-inline-block bg-warning bg-opacity-10 rounded-circle p-3 mb-3">
+                    <i class="bi bi-tools display-5 text-warning"></i>
+                </div>
+                <h3 class="fw-bold text-dark">Edit Product</h3>
+                <p class="text-muted small fw-medium">Updating: <span class="text-gradient fw-bold">{{ product.name }}</span></p>
+            </div>
+            <div class="card-body p-4 pb-5">
+                <form method="POST" action="/edit_product/{{ product.id }}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted ms-2">Product Name</label>
+                        <input type="text" name="name" class="form-control bg-light border-0 rounded-pill px-4 shadow-sm fw-medium" value="{{ product.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted ms-2">Category</label>
+                        <select name="category" class="form-select bg-light border-0 rounded-pill px-4 shadow-sm fw-medium">
+                            <option value="Stationery" {% if product.category == 'Stationery' %}selected{% endif %}>✏️ Stationery</option>
+                            <option value="Book" {% if product.category == 'Book' %}selected{% endif %}>📚 Book</option>
+                        </select>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted ms-2">Price (₹)</label>
+                            <input type="number" step="0.01" name="price" class="form-control bg-light border-0 rounded-pill px-4 shadow-sm fw-medium" value="{{ product.price }}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold text-muted ms-2">Stock Qty</label>
+                            <input type="number" name="quantity" class="form-control bg-light border-0 rounded-pill px-4 shadow-sm fw-medium" value="{{ product.stock_quantity }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted ms-2">Image URL</label>
+                        <input type="url" name="image_url" class="form-control bg-light border-0 rounded-pill px-4 shadow-sm fw-medium" value="{{ product.image_url }}" placeholder="https://...">
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-2">
+                        <a href="/admin" class="btn btn-light rounded-pill px-4 fw-bold shadow-sm">Cancel</a>
+                        <button type="submit" class="btn btn-warning rounded-pill px-5 fw-bold shadow-sm text-dark">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

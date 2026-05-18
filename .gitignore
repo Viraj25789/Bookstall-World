@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.env
+*.env
+viraj.py
+venv/
+.venv/
+.vercel/
+.DS_Store
+*.log
