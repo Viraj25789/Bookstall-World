@@ -1,0 +1,160 @@
+/* Poppins: A round, friendly, modern font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* Global Reset & Typography */
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f0ff; /* A very soft, cheerful lilac background */
+    color: #2d3436;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Glass Navbar with a subtle colorful glow */
+.navbar {
+    background-color: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid rgba(108, 92, 231, 0.1);
+    padding: 15px 0;
+}
+
+.navbar-brand {
+    font-weight: 800;
+    font-size: 1.6rem;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #6c5ce7, #fd79a8);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Super Fun Custom Buttons */
+.btn {
+    font-weight: 600;
+    border-radius: 50px; /* Pill shape! */
+    padding: 10px 24px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.btn:active {
+    transform: scale(0.95); /* Squish effect when clicked */
+}
+
+/* The "Magic" Gradient Button */
+.btn-magic {
+    background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+}
+
+.btn-magic:hover {
+    background: linear-gradient(135deg, #5b4bc4, #8c82f8);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(108, 92, 231, 0.5);
+    color: white;
+}
+
+/* Bouncy, Soft Cards */
+.modern-card {
+    background: #ffffff;
+    border-radius: 24px; /* Extra rounded corners */
+    border: none;
+    box-shadow: 0 8px 24px rgba(149, 157, 165, 0.15);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Bouncy hover! */
+    overflow: hidden;
+}
+
+.modern-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(108, 92, 231, 0.15); /* Purple shadow on hover */
+}
+
+/* Cool text gradient for headings */
+.text-gradient {
+    background: linear-gradient(135deg, #ff7675, #6c5ce7);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
+}
+
+/* Main Content Wrapper */
+.main-container {
+    margin-top: 40px;
+    margin-bottom: 60px;
+}
+
+/* Fun Search Bar */
+.search-pill {
+    background: white;
+    border-radius: 50px;
+    padding: 5px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    border: 2px solid transparent;
+    transition: 0.3s;
+}
+.search-pill:focus-within {
+    border-color: #a29bfe;
+    box-shadow: 0 10px 30px rgba(108, 92, 231, 0.15);
+}
+
+
+
+
+/* =========================================
+   📱 MOBILE RESPONSIVENESS TWEAKS
+   ========================================= */
+@media (max-width: 991px) {
+    /* 1. Shrink massive text */
+    .display-3 {
+        font-size: 2.5rem;
+        font-weight: 800;
+    }
+    
+    /* 2. Fix the Navbar dropdown spacing */
+    .navbar-collapse .btn {
+        width: 100%;
+        margin-bottom: 10px;
+        text-align: left;
+    }
+    .navbar-collapse .badge {
+        float: right;
+    }
+    .navbar-text {
+        display: block;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+
+    /* 3. Stack the Search Pill */
+    .search-pill {
+        flex-direction: column;
+        border-radius: 16px; /* Change from pill to a rounded box */
+        padding: 15px;
+    }
+    .search-pill .vr {
+        display: none; /* Hide the vertical line */
+    }
+    .search-pill input, 
+    .search-pill select, 
+    .search-pill button {
+        width: 100% !important;
+        margin: 5px 0 !important;
+        border-radius: 12px !important;
+    }
+
+    /* 4. Reduce wasted space on Auth Cards & main container */
+    .auth-card {
+        margin-top: 20px;
+        border-radius: 20px;
+    }
+    .auth-card .card-body {
+        padding: 20px !important;
+    }
+    .main-container {
+        padding: 15px !important;
+        border-radius: 0;
+        box-shadow: none;
+        margin-top: 0;
+    }
+}

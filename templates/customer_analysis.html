@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="d-flex align-items-center mb-4 gap-3 flex-wrap">
+    <a href="/admin/orders" class="btn btn-light rounded-pill shadow-sm fw-bold">
+        <i class="bi bi-arrow-left me-1"></i> Orders
+    </a>
+    <div>
+        <h2 class="fw-bold text-dark mb-0">🔍 Customer Profile</h2>
+        <p class="text-muted fw-medium mb-0 small">Deep dive for <span class="text-gradient fw-bold">{{ user.username }}</span></p>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-5">
+        <div class="card modern-card border-0 shadow-sm h-100 p-4">
+            <h5 class="fw-bold mb-3">🧠 Behaviour Profile</h5>
+            <div class="text-center mb-3">
+                <span class="badge bg-{{ behaviour_colour }} rounded-pill fs-6 px-4 py-2">{{ behaviour_label }}</span>
+            </div>
+            <p class="text-muted fw-medium small text-center mb-4">{{ behaviour_desc }}</p>
+            <div class="list-group list-group-flush rounded-3 overflow-hidden">
+                <div class="list-group-item d-flex justify-content-between border-0 bg-light mb-1 rounded-3">
+                    <span class="fw-bold small text-muted">💸 Total Spent</span>
+                    <span class="fw-bold small text-dark">₹{{ total_spent }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between border-0 bg-light mb-1 rounded-3">
+                    <span class="fw-bold small text-muted">📦 Total Orders</span>
+                    <span class="fw-bold small text-dark">{{ total_orders_count }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between border-0 bg-light mb-1 rounded-3">
+                    <span class="fw-bold small text-muted">💳 Avg Order Value</span>
+                    <span class="fw-bold small text-dark">₹{{ avg_order_value }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between border-0 bg-light mb-1 rounded-3">
+                    <span class="fw-bold small text-muted">⭐ Favourite Product</span>
+                    <span class="fw-bold small text-dark text-end" style="max-width: 55%;">{{ favourite_product }}</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between border-0 bg-light rounded-3">
+                    <span class="fw-bold small text-muted">🏷️ Favourite Category</span>
+                    <span class="fw-bold small text-dark">{{ favourite_category }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="card modern-card border-0 shadow-sm h-100 p-4">
+            <h5 class="fw-bold mb-3">📈 Spend Over Time</h5>
+            {% if order_dates %}
+            <canvas id="spendChart" height="200"></canvas>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-graph-up display-3 opacity-25 d-block mb-2"></i>
+                <p class="fw-bold">No order history yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-6">
+        <div class="card modern-card border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent pt-4 pb-0">
+                <h5 class="fw-bold">🛒 Purchase History</h5>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-borderless align-middle mb-0">
+                    <thead class="bg-light small fw-bold">
+                        <tr><th class="ps-4 py-3">Product</th><th class="pe-4 text-end">Units Bought</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for name, qty in top_user_products %}
+                        <tr class="border-bottom border-light">
+                            <td class="ps-4 py-3 fw-bold">{{ name }}</td>
+                            <td class="pe-4 text-end">
+                                <span class="badge bg-primary rounded-pill px-3">{{ qty }}</span>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="2" class="text-center py-4 text-muted fw-bold">No purchases yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card modern-card border-0 shadow-sm h-100" style="background: linear-gradient(to bottom, #fff, #f0fff8);">
+            <div class="card-header bg-transparent pt-4 pb-0">
+                <h5 class="fw-bold">🔮 What Will They Buy Next?</h5>
+                <p class="text-muted small fw-medium">Powered by co-purchase association rules</p>
+            </div>
+            <div class="card-body">
+                {% for rec in recommendations %}
+                <div class="d-flex align-items-start mb-3 p-3 bg-white rounded-3 shadow-sm">
+                    <div class="flex-shrink-0 me-3">
+                        <div class="bg-success bg-opacity-10 rounded-circle p-2">
+                            <i class="bi bi-lightbulb-fill text-success"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-bold text-dark small">{{ rec.consequent }}</div>
+                        <div class="text-muted small">Because they bought <span class="fw-bold">{{ rec.antecedent }}</span></div>
+                        <div class="mt-1">
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill small me-1">
+                                Confidence: {{ (rec.confidence * 100)|int }}%
+                            </span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill small">
+                                Lift: {{ rec.lift }}x
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="text-center py-4 text-muted">
+                    <i class="bi bi-question-circle display-3 opacity-25 d-block mb-2"></i>
+                    <p class="fw-bold">Not enough data to predict yet.</p>
+                    <small>More orders across users will power these predictions.</small>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card modern-card border-0 shadow-sm">
+    <div class="card-header bg-transparent pt-4 pb-0">
+        <h5 class="fw-bold">📋 All Orders</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-borderless table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small fw-bold text-uppercase">
+                    <tr>
+                        <th class="ps-4 py-3">Order ID</th>
+                        <th class="py-3">Items</th>
+                        <th class="py-3">Total</th>
+                        <th class="pe-4 py-3 text-end">Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr class="border-bottom border-light">
+                        <td class="ps-4 py-3">
+                            <span class="badge bg-dark rounded-pill">#{{ order.id }}</span>
+                        </td>
+                        <td>
+                            <ul class="list-unstyled mb-0 small fw-medium text-muted">
+                            {% for item in order.items %}
+                                <li><span class="text-gradient">✦</span> {{ item.quantity }}x {{ item.product.name }}</li>
+                            {% endfor %}
+                            </ul>
+                        </td>
+                        <td class="fw-bold text-gradient fs-5">₹{{ order.total_amount }}</td>
+                        <td class="pe-4 text-end text-muted small fw-bold">{{ order.date_ordered.strftime('%b %d, %Y') }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="4" class="text-center py-5 text-muted fw-bold">No orders found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+{% if order_dates %}
+const ctx = document.getElementById('spendChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: {{ order_dates|tojson }},
+        datasets: [{
+            label: 'Order Value (₹)',
+            data: {{ order_amounts|tojson }},
+            borderColor: '#6c5ce7',
+            backgroundColor: 'rgba(108,92,231,0.1)',
+            borderWidth: 3,
+            pointRadius: 6,
+            pointBackgroundColor: '#6c5ce7',
+            tension: 0.35,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: { beginAtZero: true, grid: { display: false } },
+            x: { grid: { display: false } }
+        }
+    }
+});
+{% endif %}
+</script>
+{% endblock %}

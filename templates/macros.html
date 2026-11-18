@@ -1,0 +1,77 @@
+{% macro strip(items) %}
+<div class="d-flex gap-3 pb-2 rec-strip">
+    {% for rec in items %}{% set p = rec.product %}
+    <div class="rec-card flex-shrink-0">
+        <div class="card border-0 h-100 shadow-sm" style="border-radius:18px;overflow:hidden;">
+            <div style="background:radial-gradient(circle,#f9f7ff,#e8e4f3);height:130px;overflow:hidden;">
+                <img src="{{ p.image_url }}" alt="{{ p.name }}" style="width:100%;height:130px;object-fit:cover;" onerror="this.src='https://via.placeholder.com/300x200?text=📦'">
+            </div>
+            <div class="p-3 d-flex flex-column" style="flex:1;">
+                <span class="badge rounded-pill mb-1 align-self-start" style="background:#ffeaa7;color:#d63031;font-size:10px;">{{ p.category }}</span>
+                <p class="fw-bold text-dark mb-1 lh-sm" style="font-size:13px;min-height:34px;">{{ p.name }}</p>
+                <p class="fw-bold text-gradient mb-1" style="font-size:16px;">₹{{ p.price }}</p>
+                <p class="text-muted lh-sm mb-2" style="font-size:10px;min-height:28px;"><i class="bi bi-stars me-1" style="color:#a29bfe;"></i>{{ rec.reason }}</p>
+                <div class="mt-auto">
+                    {% if p.stock_quantity > 0 %}
+                    <form method="POST" action="/add_to_cart/{{ p.id }}">
+                        <input type="hidden" name="quantity" value="1">
+                        <button class="btn btn-dark btn-sm w-100 rounded-pill" style="font-size:12px;"><i class="bi bi-bag-plus-fill me-1"></i>Add</button>
+                    </form>
+                    {% else %}
+                    <button disabled class="btn btn-light btn-sm w-100 rounded-pill text-muted" style="font-size:12px;">Sold Out</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro bundle_strip(bundles) %}
+<div class="d-flex gap-3 pb-2 rec-strip">
+    {% for bundle in bundles %}
+    <div class="flex-shrink-0" style="width:320px;scroll-snap-align:start;">
+        <div class="card border-0 shadow-sm h-100" style="border-radius:18px;overflow:hidden;background:linear-gradient(135deg,#fdfbff,#f0edff);">
+            <div class="card-body p-3">
+                <div class="d-flex gap-2 mb-3">
+                    <div class="flex-1 text-center" style="flex:1;">
+                        <img src="{{ bundle.prod_a.image_url }}" alt="A" style="width:100%;height:80px;object-fit:cover;border-radius:12px;">
+                        <p class="fw-bold text-dark mt-1 mb-0" style="font-size:11px;">{{ bundle.prod_a.name }}</p>
+                        <p class="text-gradient fw-bold mb-0" style="font-size:12px;">₹{{ bundle.prod_a.price }}</p>
+                    </div>
+                    <div class="d-flex align-items-center fw-bold text-muted fs-4">+</div>
+                    <div class="flex-1 text-center" style="flex:1;">
+                        <img src="{{ bundle.prod_b.image_url }}" alt="B" style="width:100%;height:80px;object-fit:cover;border-radius:12px;">
+                        <p class="fw-bold text-dark mt-1 mb-0" style="font-size:11px;">{{ bundle.prod_b.name }}</p>
+                        <p class="text-gradient fw-bold mb-0" style="font-size:12px;">₹{{ bundle.prod_b.price }}</p>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-end">
+                    <div>
+                        <p class="text-muted mb-0" style="font-size:10px;">Bought together {{ bundle.freq }}x</p>
+                        <p class="fw-bold text-dark mb-0" style="font-size:13px;">Total: <span class="text-gradient">₹{{ bundle.prod_a.price + bundle.prod_b.price }}</span></p>
+                    </div>
+                    <form method="POST" action="/add_bundle/{{ bundle.prod_a.id }}/{{ bundle.prod_b.id }}">
+                        <button class="btn btn-magic btn-sm rounded-pill" style="font-size:11px;">Add Both</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endmacro %}
+
+{% macro sec(emoji, title, subtitle, pill, pill_color) %}
+<div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
+    <span style="font-size:1.4rem;">{{ emoji }}</span>
+    <div class="flex-grow-1">
+        <h5 class="fw-bold mb-0 text-dark">{{ title }}</h5>
+        <p class="text-muted small fw-medium mb-0" style="font-size:12px;">{{ subtitle }}</p>
+    </div>
+    {% if pill %}
+    <span class="badge rounded-pill fw-bold" style="background:{{ pill_color }};color:#fff;font-size:10px;">{{ pill }}</span>
+    {% endif %}
+</div>
+{% endmacro %}

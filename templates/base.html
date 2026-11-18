@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookStall World</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-lightning-charge-fill text-warning me-1"></i>BookStall World
+            </a>
+            
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <div class="d-flex flex-column flex-lg-row align-items-lg-center mt-3 mt-lg-0">
+                    {% if session.get('username') %}
+                        <span class="navbar-text me-lg-4 fw-bold text-dark">
+                            👋 Hey, {{ session['username'] }}!
+                        </span>
+                        
+                        {% if session['role'] == 'customer' %}
+                            <a href="/my_orders" class="btn btn-light text-primary me-lg-2 mb-2 mb-lg-0 shadow-sm">
+                                <i class="bi bi-clock-history me-1"></i> Orders
+                            </a>
+                            <a href="/cart" class="btn btn-magic me-lg-3 mb-2 mb-lg-0">
+                                <i class="bi bi-cart3 me-1"></i> Cart 
+                                {% if cart_count and cart_count > 0 %}
+                                    <span class="badge bg-white text-dark ms-1 rounded-pill">{{ cart_count }}</span>
+                                {% endif %}
+                            </a>
+                        {% elif session['role'] == 'admin' %}
+                            <a href="/admin/analytics" class="btn btn-light text-success me-lg-2 mb-2 mb-lg-0 shadow-sm">Analytics</a>
+                            <a href="/admin/orders" class="btn btn-light text-warning me-lg-2 mb-2 mb-lg-0 shadow-sm">Orders</a>
+                            <a href="/admin" class="btn btn-magic me-lg-3 mb-2 mb-lg-0">Inventory</a>
+                        {% endif %}
+                        
+                        <a href="/logout" class="btn btn-outline-danger border-0 fw-bold">Logout</a>
+                    {% else %}
+                        <a href="/login" class="btn btn-light text-dark me-lg-2 mb-2 mb-lg-0 shadow-sm">Login</a>
+                        <a href="/register" class="btn btn-magic">Register ✨</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container main-container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+              <div class="alert alert-info border-0 shadow-sm rounded-pill text-center mb-4 fw-bold" style="background-color: #e0f7fa; color: #00838f;">
+                  <i class="bi bi-stars me-2"></i>{{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
