@@ -44,19 +44,22 @@ for _old, _new in [
 if _db_url and 'sslmode' not in _db_url:
     _db_url += ('&' if '?' in _db_url else '?') + 'sslmode=require'
 
-# Use a placeholder when env var is missing so the app at least boots;
-# the /setup route will show a clear message instead of a cryptic 500.
-app.config['SQLALCHEMY_DATABASE_URI'] = _db_url or 'postgresql+psycopg2://localhost/placeholder'
+# Use SQLite for local development when no PostgreSQL URL is configured.
+# Production deployments should provide POSTGRES_URL_NON_POOLING or POSTGRES_URL.
+app.config['SQLALCHEMY_DATABASE_URI'] = _db_url or 'sqlite:///bookstall.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Serverless-safe pool — Vercel may spin a fresh process per request
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
-    'pool_size': 1,
-    'max_overflow': 2,
-    'pool_recycle': 300,
-    'pool_pre_ping': True,
-    'connect_args': {'connect_timeout': 10},
-}
+# PostgreSQL pool options are not valid for SQLite's local development engine.
+if _db_url:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'pool_size': 1,
+        'max_overflow': 2,
+        'pool_recycle': 300,
+        'pool_pre_ping': True,
+        'connect_args': {'connect_timeout': 10},
+    }
+else:
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {}
 
 db.init_app(app)
 
