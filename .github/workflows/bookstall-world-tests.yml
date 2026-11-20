@@ -1,0 +1,43 @@
+name: Bookstall World Tests
+
+on:
+  push:
+    paths:
+      - "app.py"
+      - "models.py"
+      - "utils.py"
+      - "extensions.py"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/bookstall-world-tests.yml"
+  pull_request:
+    paths:
+      - "app.py"
+      - "models.py"
+      - "utils.py"
+      - "extensions.py"
+      - "tests/**"
+      - "requirements.txt"
+      - ".github/workflows/bookstall-world-tests.yml"
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      - name: Run tests
+        env:
+          SECRET_KEY: test-only-secret
+          INITIAL_ADMIN_PASSWORD: test-only-initial-admin-password
+        run: python -m unittest discover -s tests -v
