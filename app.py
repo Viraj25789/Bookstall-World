@@ -11,7 +11,14 @@ from collections import defaultdict
 app = Flask(__name__)
 
 # ── Security ──────────────────────────────────────────────────────────────────
-app.secret_key = os.environ.get('SECRET_KEY', 'bookstall25789')
+# Always provide SECRET_KEY in deployment. The random fallback is for local use
+# only and intentionally invalidates sessions when the process restarts.
+app.secret_key = os.environ.get('SECRET_KEY') or os.urandom(32)
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    SESSION_COOKIE_SECURE=os.environ.get('SESSION_COOKIE_SECURE', 'false').lower() == 'true'
+)
 
 # ── Database (Vercel Postgres — free, inside Vercel dashboard) ────────────────
 # Vercel Postgres exposes two URLs:
@@ -68,10 +75,14 @@ def setup():
     try:
         with app.app_context():
             db.create_all()
-            setup_store()
-        return '✅ Database ready! Login at /login  (admin / 123)', 200
-    except Exception as e:
-        return f'❌ DB error: {e}', 500
+            admin_password = os.environ.get('INITIAL_ADMIN_PASSWORD')
+            if not admin_password or len(admin_password) < 12:
+                return 'Set INITIAL_ADMIN_PASSWORD to a value of at least 12 characters, then retry setup.', 400
+            setup_store(admin_password=admin_password)
+        return 'Database ready. Sign in with the admin account and the password configured in INITIAL_ADMIN_PASSWORD.', 200
+    except Exception:
+        app.logger.exception("Bookstall database setup failed")
+        return 'Database setup failed. Check the application logs for details.', 500
 
 
 # ── Inject cart count into every template ─────────────────────────────────────
@@ -368,5 +379,8 @@ def customer_analysis(user_id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        setup_store()
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+        admin_password = os.environ.get('INITIAL_ADMIN_PASSWORD')
+        if not admin_password or len(admin_password) < 12:
+            raise RuntimeError("Set INITIAL_ADMIN_PASSWORD (at least 12 characters) before starting the app.")
+        setup_store(admin_password=admin_password)
+    app.run(debug=os.environ.get('FLASK_DEBUG', 'false').lower() == 'true', host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
