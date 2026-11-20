@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Local databases and environment secrets
+bookstall.db
+instance/
+.env
+.env.*
+!.env.example
+
+# Generated model / local artifacts
+*.log
