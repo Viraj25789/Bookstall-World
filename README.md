@@ -1,105 +1,115 @@
-# 📚 Bookstall World — Vercel Deployment (100% Vercel, nothing else)
+# Bookstall World
 
-Everything — hosting + database — lives inside your Vercel account.
+Bookstall World is a Flask + SQLAlchemy bookstore application with customer shopping flows, inventory management, order history, and a small order-based recommendation/analytics engine.
 
----
+## Features
 
-## Step 1 — Push code to GitHub
+- Customer registration and login
+- Product search and category filtering
+- Shopping cart, stock-aware checkout, and order history
+- Admin product management and order views
+- Sales analytics, frequently bought-together bundles, and basic recommendations
+- PostgreSQL support for deployment and SQLite for local development
+
+## Stack
+
+Python, Flask, Flask-SQLAlchemy, SQLAlchemy, PostgreSQL/SQLite, Jinja templates, and Werkzeug password hashing.
+
+## Run locally
+
+Use Python 3.10+.
 
 ```bash
-git init
-git add .
-git commit -m "bookstall world"
-# Create a new repo on github.com, then:
-git remote add origin https://github.com/YOUR_USERNAME/bookstall-world.git
-git push -u origin main
+python -m venv .venv
 ```
 
----
+Windows PowerShell:
 
-## Step 2 — Create project on Vercel
+```powershell
+.venv\Scripts\Activate.ps1
+```
 
-1. Go to **https://vercel.com** → sign up free with GitHub
-2. Click **Add New → Project**
-3. Import your `bookstall-world` repo → click **Deploy**
-   - Build settings: leave everything as default
-   - Don't add env vars yet — do that in Step 4
+macOS / Linux:
 
----
+```bash
+source .venv/bin/activate
+```
 
-## Step 3 — Add a free Postgres database (inside Vercel)
+Install dependencies:
 
-1. In your Vercel project → click the **Storage** tab
-2. Click **Create Database** → choose **Postgres** → click **Continue**
-3. Keep default settings → click **Create**
-4. Vercel creates the DB and **automatically connects it** to your project ✅
-   - It injects `POSTGRES_URL` into your project's env vars automatically
+```bash
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
 
----
+Configure a private session secret and a strong initial administrator password (at least 12 characters).
 
-## Step 4 — Add your 2 env vars
+Windows PowerShell:
 
-Go to your Vercel project → **Settings → Environment Variables** and add:
+```powershell
+$env:SECRET_KEY = "replace-with-a-long-random-secret"
+$env:INITIAL_ADMIN_PASSWORD = "replace-with-a-strong-password"
+python app.py
+```
 
-| Name | Value |
+macOS / Linux:
+
+```bash
+export SECRET_KEY="$(python -c 'import secrets; print(secrets.token_hex(32))')"
+export INITIAL_ADMIN_PASSWORD="replace-with-a-strong-password"
+python app.py
+```
+
+Open http://127.0.0.1:5000. For local development, the app uses a SQLite database configured by Flask-SQLAlchemy. The first run creates the tables and an administrator account named `admin`; the password is the value of `INITIAL_ADMIN_PASSWORD`.
+
+## Deploying to Vercel with PostgreSQL
+
+1. Create a PostgreSQL database and connect it to the Vercel project.
+2. Configure `POSTGRES_URL_NON_POOLING` (preferred) or `POSTGRES_URL`.
+3. Set `SECRET_KEY` to a long, random, private value.
+4. Set `SETUP_TOKEN` to a separate random token.
+5. Set `INITIAL_ADMIN_PASSWORD` to a strong password of at least 12 characters.
+6. Set `SESSION_COOKIE_SECURE=true` when serving over HTTPS.
+7. Deploy, then visit `/setup?token=YOUR_SETUP_TOKEN` once to create the database tables and initial administrator.
+
+The setup endpoint does not return database exception details or default credentials. Check deployment logs for setup errors. Keep the setup token and initial password private; rotate/remove the setup token after initialization.
+
+## Environment variables
+
+| Variable | Purpose |
 |---|---|
-| `SECRET_KEY` | Any long random string e.g. `xK9mP2qLnR5vW3jA7bZ4cF` |
-| `SETUP_TOKEN` | Any secret word e.g. `bookstall2026` |
-
-Click **Save**, then go to **Deployments → Redeploy** (so the new vars take effect).
-
----
-
-## Step 5 — Initialise the database (one time only)
-
-Visit this URL in your browser (replace with your actual values):
-
-```
-https://YOUR-APP.vercel.app/setup?token=bookstall2026
-```
-
-You'll see:
-```
-✅ Database ready! Login at /login  (admin / 123)
-```
-
-This creates all tables and adds the default accounts.
-
----
-
-## Step 6 — You're live! 🎉
-
-Visit your app URL. Login credentials:
-- **Admin:** `admin` / `123` ← change this immediately!
-- **Customer:** `alice` / `alice123`
-
-Every time you push to GitHub, Vercel auto-redeploys.
-
----
+| `SECRET_KEY` | Flask session signing secret; required for stable deployed sessions |
+| `INITIAL_ADMIN_PASSWORD` | Password used when creating the first `admin` account; minimum 12 characters |
+| `SETUP_TOKEN` | Protects the one-time deployment setup endpoint |
+| `POSTGRES_URL_NON_POOLING` | Preferred direct PostgreSQL connection URL |
+| `POSTGRES_URL` | PostgreSQL fallback connection URL |
+| `SESSION_COOKIE_SECURE` | Set to `true` for HTTPS deployments |
+| `FLASK_DEBUG` | Set to `true` only for local debugging |
 
 ## Project structure
 
+```text
+Bookstall-World/
+├── app.py
+├── extensions.py
+├── models.py
+├── utils.py
+├── requirements.txt
+├── vercel.json
+├── others/
+├── static/
+└── templates/
 ```
-bookstall-world/
-├── app.py              ← Flask app (Vercel entry point)
-├── models.py           ← Database models (PostgreSQL-compatible)
-├── extensions.py       ← db instance
-├── utils.py            ← decorators + recommendation engine
-├── vercel.json         ← Vercel routing config
-├── requirements.txt    ← Python dependencies (uses psycopg2 for Postgres)
-├── .env.example        ← Template — copy to .env for local dev
-├── .gitignore
-├── static/css/style.css
-└── templates/*.html
-```
 
----
+## Current limitations and security notes
 
-## Troubleshooting
+- The recommendation engine is a lightweight heuristic using order co-occurrence, purchase history, category, and popularity signals; it is not a trained machine-learning recommender.
+- This is a portfolio/demo application, not a production commerce platform.
+- Add CSRF protection to all state-changing forms before public deployment.
+- Use database migrations for schema changes and review transaction/locking behavior for concurrent checkout.
+- Configure database backups, HTTPS, monitoring, and rate limits before handling real users or payments.
+- Payment processing is not integrated; placing an order is a demonstration checkout flow.
 
-| Problem | Fix |
-|---|---|
-| App loads but shows error | Visit `/setup?token=YOUR_TOKEN` first |
-| "POSTGRES_URL is not set" | Make sure the Postgres store is linked to the project in the Storage tab |
-| Env vars not working | After adding vars → go to Deployments → Redeploy |
-| Want to reset the DB | In Vercel Storage → your DB → Query tab, run `DROP SCHEMA public CASCADE; CREATE SCHEMA public;` then visit `/setup?token=...` again |
+## License
+
+No license file is currently included. Contact the repository owner before reusing or redistributing this project.
