@@ -143,9 +143,16 @@ def build_recommendations(user_id=None):
     res.update({'bundles': compute_top_bundles(4), 'fav_cat': fav_cat})
     return {k: v[:6] if isinstance(v, list) else v for k, v in res.items()}
 
-def setup_store():
-    if User.query.first(): return
-    db.session.add(User(username='admin', password=generate_password_hash('123'), role='admin'))
-    db.session.add(User(username='alice', password=generate_password_hash('alice123'), role='customer'))
+def setup_store(admin_password):
+    """Create the initial administrator using a password supplied by the operator."""
+    if User.query.first():
+        return
+    if not admin_password or len(admin_password) < 12:
+        raise ValueError("Initial admin password must contain at least 12 characters.")
+    db.session.add(User(
+        username='admin',
+        password=generate_password_hash(admin_password),
+        role='admin'
+    ))
     db.session.commit()
-    print("✅ Store initialized.")
+    print("Store initialized with the configured administrator account.")
