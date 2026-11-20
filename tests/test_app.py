@@ -14,8 +14,6 @@ class BookstallTests(unittest.TestCase):
         app.config.update(
             TESTING=True,
             SECRET_KEY="test-secret-key",
-            SQLALCHEMY_DATABASE_URI="sqlite://",
-            SQLALCHEMY_ENGINE_OPTIONS={},
         )
         with app.app_context():
             db.create_all()
