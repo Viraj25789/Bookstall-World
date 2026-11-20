@@ -101,6 +101,7 @@ def login():
     if request.method == 'POST':
         user = User.query.filter_by(username=request.form['username']).first()
         if user and check_password_hash(user.password, request.form['password']):
+            session.clear()
             session.update({'user_id': user.id, 'username': user.username, 'role': user.role})
             return redirect('/admin' if user.role == 'admin' else '/')
         flash('Invalid credentials.')
@@ -188,7 +189,7 @@ def view_cart():
 @app.route('/update_cart/<int:cart_id>', methods=['POST'])
 @login_required
 def update_cart(cart_id):
-    item = CartItem.query.get_or_404(cart_id)
+    item = CartItem.query.filter_by(id=cart_id, user_id=session['user_id']).first_or_404()
     qty = int(request.form.get('quantity', 1))
     if qty <= 0:
         db.session.delete(item)
@@ -201,7 +202,8 @@ def update_cart(cart_id):
 @app.route('/remove_from_cart/<int:cart_id>', methods=['POST'])
 @login_required
 def remove_from_cart(cart_id):
-    db.session.delete(CartItem.query.get_or_404(cart_id))
+    item = CartItem.query.filter_by(id=cart_id, user_id=session['user_id']).first_or_404()
+    db.session.delete(item)
     db.session.commit()
     return redirect('/cart')
 
@@ -211,6 +213,13 @@ def remove_from_cart(cart_id):
 def checkout():
     items = CartItem.query.filter_by(user_id=session['user_id']).all()
     if not items:
+        return redirect('/cart')
+    unavailable = [
+        item.product.name for item in items
+        if item.quantity <= 0 or item.quantity > item.product.stock_quantity
+    ]
+    if unavailable:
+        flash('Some cart quantities exceed current stock. Please update your cart.')
         return redirect('/cart')
     order = Order(
         user_id=session['user_id'],
